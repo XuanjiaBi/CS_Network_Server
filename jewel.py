@@ -120,7 +120,7 @@ class Jewel:
                         # To handle the errors:
                         try:
                             client.send(b"HTTP/1.1 200 OK\r\n")
-                            client.sendall(("Server: xb4syf\r\n Content-Length: {:}\r\n\r\n".format(header)).encode())
+                            client.sendall(("Server: xb4syf\r\n\r\n Content-Length: {:}\r\n\r\n".format(header)).encode())
                             client.sendall(file_context)
                         except BlockingIOError or BrokenPipeError:
                             return
