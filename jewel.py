@@ -160,7 +160,7 @@ if __name__ == "__main__":
     # port = int(sys.argv[1])
     # file_path = sys.argv[2]
     port = int(os.environ.get('PORT', 5000))
-    file_path = '~/PycharmProjects/CS 4457/Project 2/EC_root'
+    file_path = './EC_root'
     FR = FileReader()
 
     J = Jewel(port, file_path, FR)
