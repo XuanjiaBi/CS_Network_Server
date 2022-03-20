@@ -112,7 +112,7 @@ class Jewel:
                     elif isinstance(file_context, str):
                         client.send(b"HTTP/1.1 200 OK\r\n")
                         client.sendall("0".encode())
-                        client.sendall(("Content-Length: {:}\r\n\r\n".format(header)).encode())
+                        client.sendall(("Server: xb4syf\r\nContent-Length: {:}\r\n\r\n".format(header)).encode())
                     else:
                         # print("Content-Length: {:}\r\n\r\n".format(header))
                         sys.stdout.write("[REQU] [" + str(address) + ":" + str(port) + "] " + str(
@@ -120,8 +120,8 @@ class Jewel:
                         # To handle the errors:
                         try:
                             client.send(b"HTTP/1.1 200 OK\r\n")
-                            client.sendall("Server: xb4syf".encode())
-                            client.sendall(("Content-Length: {:}\r\n\r\n".format(header)).encode())
+                            #client.sendall("Server: xb4syf".encode())
+                            client.sendall(("Server: xb4syf\r\nContent-Length: {:}\r\n\r\n".format(header)).encode())
                             client.sendall(file_context)
                         except BlockingIOError or BrokenPipeError:
                             return
@@ -136,13 +136,13 @@ class Jewel:
                         # if it is a dir send out the string that indicate the dic
                         client.send(b"HTTP/1.1 200 OK\r\n")
                         client.sendall(header.encode())
-                        client.sendall(("Content-Length: {:}\r\n\r\n".format(header)).encode())
+                        client.sendall(("Server: xb4syf\r\nContent-Length: {:}\r\n\r\n".format(header)).encode())
                         del message_queues[s]
                     else:
                         sys.stdout.write("[REQU] [" + str(address) + ":" + str(port) + "] " + str(
                             requestType) + " request for " + str(path) + "\n")
                         client.send(b"HTTP/1.1 200 OK\r\n")
-                        client.sendall(("Content-Length: {:}\r\n\r\n".format(header)).encode())
+                        client.sendall(("Server: xb4syf\r\nContent-Length: {:}\r\n\r\n".format(header)).encode())
                 if not (requestType == "GET" or requestType == "HEAD"):
                     sys.stdout.write("[ERRO] [" + str(address) + ":" + str(port) + "] " + str(
                         requestType) + " request returned error 501\n")
