@@ -106,7 +106,7 @@ class Jewel:
                         client.send(b"HTTP/1.1 404 Not Found\r\n")
                         client.sendall("0".encode())
                         client.sendall(("Content-Length: {0}\r\n\r\n").encode())
-                        client.sendall("Server: xb4syf\r\n\r\n".encode())
+#                       client.sendall("Server: xb4syf\r\n\r\n".encode())
                         file_context = "<html><body><h1>{}</h1></body></html>".format("Invalid Path")
                         client.sendall(file_context.encode())
                     elif isinstance(file_context, str):
@@ -115,6 +115,7 @@ class Jewel:
                         client.sendall(("Content-Length: {:}\r\n\r\n".format(header)).encode())
                     else:
                         # print("Content-Length: {:}\r\n\r\n".format(header))
+                        client.sendall("Server: xb4syf\r\n\r\n".encode())
                         sys.stdout.write("[REQU] [" + str(address) + ":" + str(port) + "] " + str(
                             requestType) + " request for " + str(path) + "\n")
                         # To handle the errors:
