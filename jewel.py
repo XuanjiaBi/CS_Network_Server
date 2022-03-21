@@ -115,6 +115,7 @@ class Jewel:
                         client.sendall(("Server: xb4syf\r\nContent-Length: {:}\r\n\r\n".format(header)).encode())
                     else:
                         # print("Content-Length: {:}\r\n\r\n".format(header))
+                        #
                         sys.stdout.write("[REQU] [" + str(address) + ":" + str(port) + "] " + str(
                             requestType) + " request for " + str(path) + "\n")
                         # To handle the errors:
