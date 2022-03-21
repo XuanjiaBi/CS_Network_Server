@@ -1,1 +1,0 @@
-This is my car. Love it so much! 
