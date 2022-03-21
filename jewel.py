@@ -3,7 +3,6 @@
 # GET /index.html HTTP/1.1
 # Host: localhost:4457
 # Connection: keep-alive
-#
 # sec-ch-ua: " Not A;Brand";v="99", "Chromium";v="98", "Google Chrome";v="98"
 # sec-ch-ua-mobile: ?0
 # sec-ch-ua-platform: "Windows"
@@ -18,14 +17,11 @@
 # Accept-Encoding: gzip, deflate, br
 # Accept-Language: en-US,en;q=0.9
 # Cookie: csrftoken=Ke7jl5xTGXg1UFxk2PlYQapAUOlWC1hEJsS6xAMXqwZ6nLA4fFpb55Ggj0VxtqI0;
-
-
 import os.path
 import socket
 import sys
 import queue
 import select
-import os
 
 from file_reader import FileReader
 
@@ -89,12 +85,8 @@ class Jewel:
                 #s.setblocking(0)
                 try:
                     data = message_queues[s].get_nowait()
-                except queue.Empty:
-                    print("")
-                    outputs.remove(s)
-                else:
-                    print(data)
-                    sys.stdout.write("[CONN] Connection from " + str(address) + " on port " + str(port)+"\n")
+                    # print(data)
+                    sys.stdout.write("[CONN] Connection from " + str(address) + " on port " + str(port) + "\n")
                     data = data.decode('utf-8')
                     requestType = data.split("\n")[0].split()[0]
                     path = data.split("\n")[0].split()[1]
@@ -102,73 +94,68 @@ class Jewel:
                     header = file_reader.head(file_path + path, "")
                     ## GET::
                     # ------------------------------------------------------------------------
-                if requestType == "GET":
-                    if file_context is None:
-                        sys.stdout.write("[ERRO] [" + str(address) + ":" + str(port) + "] " + str(
-                            requestType) + " request returned error 404\n")
-                        client.send(b"HTTP/1.1 404 Not Found\r\n")
-                        client.sendall("0".encode())
-                        client.sendall(("Content-Length: {0}\r\n\r\n").encode())
-#                       client.sendall("Server: xb4syf\r\n\r\n".encode())
-                        file_context = "<html><body><h1>{}</h1></body></html>".format("Invalid Path")
-                        client.sendall(file_context.encode())
-                    elif isinstance(file_context, str):
-                        client.send(b"HTTP/1.1 200 OK\r\n")
-                        client.sendall("0".encode())
-                        client.sendall(("Server: xb4syf\r\nContent-Length: {:}\r\n\r\n".format(header)).encode())
-                    else:
-                        # print("Content-Length: {:}\r\n\r\n".format(header))
-                        #
-                        sys.stdout.write("[REQU] [" + str(address) + ":" + str(port) + "] " + str(
-                            requestType) + " request for " + str(path) + "\n")
-                        # To handle the errors:
-                        try:
+                    if requestType == "GET":
+                        if file_context is None:
+                            sys.stdout.write("[ERRO] [" + str(address) + ":" + str(port) + "] " + str(
+                                requestType) + " request returned error 404\n")
+                            client.send(b"HTTP/1.1 404 Not Found\r\n")
+                            client.sendall("0".encode())
+                            client.sendall(("Content-Length: {0}\r\n\r\n").encode())
+                            file_context = "<html><body><h1>{}</h1></body></html>".format("Invalid Path")
+                            client.sendall(file_context.encode())
+                        elif isinstance(file_context, str):
                             client.send(b"HTTP/1.1 200 OK\r\n")
-                            client.sendall(("Server: xb4syf\r\nContent-Length: {:}\r\n\r\n".format(header)).encode())
-                            client.sendall(file_context)
-                        except BlockingIOError or BrokenPipeError:
-                            return
-                        print("succeed")
-                if requestType == "HEAD":
-                    if header is None:
-                        # print("[ERRO] [" + str(address) + ":" + str(port) + "] " + str(requestType) + " request returned error 404\n")
-                        client.send(b"HTTP/1.1 404 Not Found\r\n")
+                            client.sendall("0".encode())
+                            client.sendall(("Content-Length: {:}\r\n\r\n".format(header)).encode())
+                        else:
+                            # print("Content-Length: {:}\r\n\r\n".format(header))
+                            sys.stdout.write("[REQU] [" + str(address) + ":" + str(port) + "] " + str(
+                                requestType) + " request for " + str(path) + "\n")
+                            # To handle the errors:
+                            try:
+                                client.send(b"HTTP/1.1 200 OK\r\n")
+                                client.sendall(("Content-Length: {:}\r\n\r\n".format(header)).encode())
+                                client.sendall(file_context)
+                            except BlockingIOError or BrokenPipeError or ConnectionResetError:
+                                return
+                            print("succeed")
+                    if requestType == "HEAD":
+                        if header is None:
+                            # print("[ERRO] [" + str(address) + ":" + str(port) + "] " + str(requestType) + " request returned error 404\n")
+                            client.send(b"HTTP/1.1 404 Not Found\r\n")
+                            client.sendall("0".encode())
+                            client.sendall("Content-Length: {0}\r\n\r\n".encode())
+                        elif isinstance(header, str):
+                            # if it is a dir send out the string that indicate the dic
+                            client.send(b"HTTP/1.1 200 OK\r\n")
+                            client.sendall(header.encode())
+                            client.sendall(("Content-Length: {:}\r\n\r\n".format(header)).encode())
+                            del message_queues[s]
+                        else:
+                            sys.stdout.write("[REQU] [" + str(address) + ":" + str(port) + "] " + str(
+                                requestType) + " request for " + str(path) + "\n")
+                            client.send(b"HTTP/1.1 200 OK\r\n")
+                            client.sendall(("Content-Length: {:}\r\n\r\n".format(header)).encode())
+                    if not (requestType == "GET" or requestType == "HEAD"):
+                        sys.stdout.write("[ERRO] [" + str(address) + ":" + str(port) + "] " + str(
+                            requestType) + " request returned error 501\n")
+                        client.send(b"HTTP/1.1 501 Not Implemented\r\n")
                         client.sendall("0".encode())
-                        client.sendall("Content-Length: {0}\r\n\r\n".encode())
-                    elif isinstance(header, str):
-                        # if it is a dir send out the string that indicate the dic
-                        client.send(b"HTTP/1.1 200 OK\r\n")
-                        client.sendall(header.encode())
-                        client.sendall(("Server: xb4syf\r\nContent-Length: {:}\r\n\r\n".format(header)).encode())
-                        del message_queues[s]
-                    else:
-                        sys.stdout.write("[REQU] [" + str(address) + ":" + str(port) + "] " + str(
-                            requestType) + " request for " + str(path) + "\n")
-                        client.send(b"HTTP/1.1 200 OK\r\n")
-                        client.sendall(("Server: xb4syf\r\nContent-Length: {:}\r\n\r\n".format(header)).encode())
-                if not (requestType == "GET" or requestType == "HEAD"):
-                    sys.stdout.write("[ERRO] [" + str(address) + ":" + str(port) + "] " + str(
-                        requestType) + " request returned error 501\n")
-                    client.send(b"HTTP/1.1 501 Not Implemented\r\n")
-                    client.sendall("0".encode())
-                    client.sendall(("Content-Length: {:}\r\n\r\n".format(header)).encode())
-            # # Handle "exceptional conditions"
-            for s in exceptional:
-                print("Handling exception for: " + str(s.getpeername()) + " \n")
-                inputs.remove(s)
-                for s in outputs:
+                        client.sendall(("Content-Length: {:}\r\n\r\n".format(header)).encode())
+                except queue.Empty:
                     outputs.remove(s)
-                s.close()
-                # remove message queue
-                del message_queues[s]
+
+            # # Handle "exceptional conditions"
+            # for s in exceptional:
+            #     print("Handling exception for: " + str(s.getpeername()) + " \n")
+            #     inputs.remove(s)
+            #     for s in outputs:
+            #         outputs.remove(s)
+            #     s.close()
+            #     # remove message queue
+            #     del message_queues[s]
 if __name__ == "__main__":
-    # port = int(sys.argv[1])
-    # file_path = sys.argv[2]
     port = int(os.environ.get('PORT', 5000))
     file_path = './EC_root'
     FR = FileReader()
-
     J = Jewel(port, file_path, FR)
-    ## port = int(os.environ.get('PORT',5000))
-    ## filde_path = 'file_Path'
-    
