@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-
 # GET /index.html HTTP/1.1
 # Host: localhost:4457
 # Connection: keep-alive
